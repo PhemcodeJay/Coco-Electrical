@@ -1,0 +1,97 @@
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar styles */
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.navbar .bi-lightning-charge-fill {
+    color: #f59e0b;
+}
+
+/* Product card styles */
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.product-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Hero section */
+.bg-primary {
+    background-color: #1e40af !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #1e40af;
+    border-color: #1e40af;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+}
+
+.btn-warning:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+}
+
+.text-primary {
+    color: #1e40af !important;
+}
+
+/* Category cards */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    transition: transform 0.2s;
+}
+
+/* WhatsApp button */
+.btn-success {
+    background-color: #25D366;
+    border-color: #25D366;
+}
+
+.btn-success:hover {
+    background-color: #128C7E;
+    border-color: #128C7E;
+}
+
+/* Footer */
+footer a:hover {
+    text-decoration: underline !important;
+}
+
+/* Price display */
+.price {
+    font-weight: 600;
+    color: #1e40af;
+}
+
+/* Cart items */
+.cart-item img {
+    max-height: 80px;
+    object-fit: cover;
+}

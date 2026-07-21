@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Home - Coco Household Store{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Quality Electrical & Household Appliances</h1>
+                <p class="lead">Find everything you need for your home at affordable prices. From kitchen essentials to lighting solutions.</p>
+                <a href="{{ url_for('products') }}" class="btn btn-warning btn-lg">Shop Now</a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-house-gear-fill" style="font-size: 15rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="container mb-5">
+    <h2 class="text-center mb-4">Shop by Category</h2>
+    <div class="row g-4">
+        {% for category in categories %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <a href="{{ url_for('products', category=category) }}" class="text-decoration-none">
+                <div class="card h-100 text-center p-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-box-seam text-primary mb-2" style="font-size: 2.5rem;"></i>
+                        <h5 class="card-title">{{ category }}</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="container">
+    <h2 class="text-center mb-4">Featured Products</h2>
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card h-100 product-card">
+                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-muted small flex-grow-1">{{ product.description[:60] }}...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h5 mb-0">₦{{ "{:,.0f}".format(product.price) }}</span>
+                        <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-cart-plus"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-primary small">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{{ url_for('products') }}" class="btn btn-outline-primary">View All Products</a>
+    </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="bg-light py-5 mt-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Why Choose Coco Household Store?</h2>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <i class="bi bi-truck text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4>Fast Delivery</h4>
+                <p>We deliver your orders quickly and safely to your doorstep.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-shield-check text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4>Quality Guaranteed</h4>
+                <p>All our products are authentic and come with warranty.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-whatsapp text-primary mb-3" style="font-size: 3rem;"></i>
+                <h4>WhatsApp Support</h4>
+                <p>Easy ordering via WhatsApp. Chat with us anytime!</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
