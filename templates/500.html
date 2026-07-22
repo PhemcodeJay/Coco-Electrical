@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Server Error - Coco Household Store{% endblock %}
+{% block content %}
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <i class="bi bi-gear display-1 text-danger"></i>
+            <h1 class="display-4 mt-4">500</h1>
+            <h2 class="h4 mb-4">Internal Server Error</h2>
+            <p class="lead">Something went wrong on our end. Please try again later.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Go to Homepage</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

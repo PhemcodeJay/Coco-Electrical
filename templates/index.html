@@ -3,31 +3,31 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-primary text-white py-5 mb-5">
+<section class="bg-primary text-white py-5 mb-5" role="banner">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <h1 class="display-4 fw-bold">Quality Electrical & Household Appliances</h1>
                 <p class="lead">Find everything you need for your home at affordable prices. From kitchen essentials to lighting solutions.</p>
-                <a href="{{ url_for('products') }}" class="btn btn-warning btn-lg">Shop Now</a>
+                <a href="{{ url_for('products') }}" class="btn btn-warning btn-lg" role="button">Shop Now</a>
             </div>
             <div class="col-lg-6 text-center">
-                <i class="bi bi-house-gear-fill" style="font-size: 15rem; opacity: 0.3;"></i>
+                <i class="bi bi-house-gear-fill" style="font-size: 15rem; opacity: 0.3;" aria-hidden="true"></i>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Categories -->
-<section class="container mb-5">
-    <h2 class="text-center mb-4">Shop by Category</h2>
+<section class="container mb-5" aria-labelledby="categories-heading">
+    <h2 id="categories-heading" class="text-center mb-4">Shop by Category</h2>
     <div class="row g-4">
         {% for category in categories %}
         <div class="col-6 col-md-4 col-lg-3">
             <a href="{{ url_for('products', category=category) }}" class="text-decoration-none">
                 <div class="card h-100 text-center p-3 border-0 shadow-sm">
                     <div class="card-body">
-                        <i class="bi bi-box-seam text-primary mb-2" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-box-seam text-primary mb-2" style="font-size: 2.5rem;" aria-hidden="true"></i>
                         <h5 class="card-title">{{ category }}</h5>
                     </div>
                 </div>
@@ -38,20 +38,20 @@
 </section>
 
 <!-- Featured Products -->
-<section class="container">
-    <h2 class="text-center mb-4">Featured Products</h2>
+<section class="container" aria-labelledby="featured-heading">
+    <h2 id="featured-heading" class="text-center mb-4">Featured Products</h2>
     <div class="row g-4">
         {% for product in products %}
         <div class="col-6 col-md-4 col-lg-3">
             <div class="card h-100 product-card">
-                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" loading="lazy">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ product.name }}</h5>
                     <p class="card-text text-muted small flex-grow-1">{{ product.description[:60] }}...</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="h5 mb-0">₦{{ "{:,.0f}".format(product.price) }}</span>
-                        <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-cart-plus"></i>
+                        <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-sm btn-primary" role="button" aria-label="Add {{ product.name }} to cart">
+                            <i class="bi bi-cart-plus" aria-hidden="true"></i>
                         </a>
                     </div>
                 </div>
@@ -69,22 +69,22 @@
 </section>
 
 <!-- Why Choose Us -->
-<section class="bg-light py-5 mt-5">
+<section class="bg-light py-5 mt-5" aria-labelledby="why-choose-heading">
     <div class="container">
-        <h2 class="text-center mb-4">Why Choose Coco Household Store?</h2>
+        <h2 id="why-choose-heading" class="text-center mb-4">Why Choose Coco Household Store?</h2>
         <div class="row g-4">
             <div class="col-md-4 text-center">
-                <i class="bi bi-truck text-primary mb-3" style="font-size: 3rem;"></i>
+                <i class="bi bi-truck text-primary mb-3" style="font-size: 3rem;" aria-hidden="true"></i>
                 <h4>Fast Delivery</h4>
                 <p>We deliver your orders quickly and safely to your doorstep.</p>
             </div>
             <div class="col-md-4 text-center">
-                <i class="bi bi-shield-check text-primary mb-3" style="font-size: 3rem;"></i>
+                <i class="bi bi-shield-check text-primary mb-3" style="font-size: 3rem;" aria-hidden="true"></i>
                 <h4>Quality Guaranteed</h4>
                 <p>All our products are authentic and come with warranty.</p>
             </div>
             <div class="col-md-4 text-center">
-                <i class="bi bi-whatsapp text-primary mb-3" style="font-size: 3rem;"></i>
+                <i class="bi bi-whatsapp text-primary mb-3" style="font-size: 3rem;" aria-hidden="true"></i>
                 <h4>WhatsApp Support</h4>
                 <p>Easy ordering via WhatsApp. Chat with us anytime!</p>
             </div>
