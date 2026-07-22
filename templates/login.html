@@ -10,22 +10,63 @@
                     <h4 class="mb-0">Admin Login</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" id="loginForm">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ admin_username or '' }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" value="{{ admin_password or '' }}" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye-slash"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="d-grid">
+                        <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="button" class="btn btn-success" id="quickLoginBtn">
+                                <i class="bi bi-lightning-charge"></i> Quick Login
+                            </button>
                         </div>
                     </form>
+
+                    <div class="alert alert-info mt-3 mb-0" style="font-size: 0.9rem;">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Default Credentials:</strong><br>
+                        Username: <code>{{ admin_username or 'admin' }}</code><br>
+                        Password: <code>{{ admin_password or 'admin123' }}</code><br>
+                        <small class="text-muted">Credentials are pre-filled above. Click "Login" or use "Quick Login" to access the admin panel.</small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const password = document.getElementById('password');
+        const icon = this.querySelector('i');
+        if (password.type === 'password') {
+            password.type = 'text';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        } else {
+            password.type = 'password';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        }
+    });
+
+    // Quick Login - auto-submit the form with pre-filled credentials
+    document.getElementById('quickLoginBtn').addEventListener('click', function() {
+        document.getElementById('loginForm').submit();
+    });
+</script>
 {% endblock %}

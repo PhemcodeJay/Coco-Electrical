@@ -9,6 +9,10 @@ import uuid
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -38,7 +42,7 @@ MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
 
 # Use application directory for database (persistent)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.environ.get('DATABASE_PATH', os.path.join(BASE_DIR, 'instance', 'coco_store.db'))
+DATABASE = os.environ.get('DATABASE_PATH') or os.path.join(BASE_DIR, 'instance', 'coco_store.db')
 
 # Ensure instance and upload directories exist
 os.makedirs(os.path.dirname(DATABASE), exist_ok=True)
@@ -188,7 +192,7 @@ def login():
             flash('Invalid credentials', 'error')
             logger.warning(f"Failed login attempt for user: {username}")
     
-    return render_template('login.html')
+    return render_template('login.html', admin_username=ADMIN_USERNAME, admin_password=ADMIN_PASSWORD)
 
 @app.route('/logout')
 def logout():
