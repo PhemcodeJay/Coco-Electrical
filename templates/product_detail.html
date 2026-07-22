@@ -13,7 +13,13 @@
 
     <div class="row g-4">
         <div class="col-md-6">
-            <img src="{{ product.image_url }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
+            {% if product.image_url and product.image_url.startswith('http') %}
+                <img src="{{ product.image_url }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
+            {% elif product.image_url %}
+                <img src="{{ url_for('static', filename=product.image_url) }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/400x300?text=No+Image" class="img-fluid rounded shadow" alt="{{ product.name }}">
+            {% endif %}
         </div>
         <div class="col-md-6">
             <h1>{{ product.name }}</h1>

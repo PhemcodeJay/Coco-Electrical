@@ -5,6 +5,10 @@ from datetime import datetime
 from functools import wraps
 import logging
 from werkzeug.exceptions import NotFound
+import uuid
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Configure logging
 logging.basicConfig(
@@ -19,18 +23,94 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'coco_household_store_secret_key_2024')
 WHATSAPP_NUMBER = os.environ.get('WHATSAPP_NUMBER', '+2348033939180')
 
+# Email configuration
+MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
+
+# Upload configuration
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
+
 # Use application directory for database (persistent)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get('DATABASE_PATH', os.path.join(BASE_DIR, 'instance', 'coco_store.db'))
 
-# Ensure instance directory exists
+# Ensure instance and upload directories exist
 os.makedirs(os.path.dirname(DATABASE), exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, UPLOAD_FOLDER), exist_ok=True)
 
 # Get the directory where this script is located
 app = Flask(__name__, 
     template_folder=os.path.join(BASE_DIR, 'templates'),
     static_folder=os.path.join(BASE_DIR, 'static'))
 app.secret_key = SECRET_KEY
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_uploaded_file(file):
+    """Save an uploaded file and return the relative path."""
+    if file and allowed_file(file.filename):
+        # Generate a unique filename to prevent overwrites
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"{uuid.uuid4().hex}.{ext}"
+        filepath = os.path.join(BASE_DIR, UPLOAD_FOLDER, unique_filename)
+        file.save(filepath)
+        return f"uploads/{unique_filename}"
+    return None
+
+def send_order_email(customer_name, customer_phone, customer_address, order_details, total):
+    """Send email notification about a new order."""
+    if not MAIL_USERNAME or not MAIL_PASSWORD or not ADMIN_EMAIL:
+        logger.warning("Email not configured. Skipping order notification email.")
+        return False
+    
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = MAIL_USERNAME
+        msg['To'] = ADMIN_EMAIL
+        msg['Subject'] = f"New Order from {customer_name} - Coco Household Store"
+
+        body = f"""
+New Order Received!
+====================
+
+Customer Details:
+-----------------
+Name: {customer_name}
+Phone: {customer_phone}
+Address: {customer_address}
+
+Order Summary:
+--------------
+{order_details}
+
+Total Amount: ₦{total:,.2f}
+
+Please process this order and contact the customer for payment.
+        """
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+            if MAIL_USE_TLS:
+                server.starttls()
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.send_message(msg)
+
+        logger.info(f"Order notification email sent to {ADMIN_EMAIL}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send order email: {e}")
+        return False
 
 def login_required(f):
     @wraps(f)
@@ -272,6 +352,9 @@ def checkout():
             )
             db.commit()
             
+            # Send email notification to admin
+            send_order_email(customer_name, customer_phone, customer_address, order_details, total)
+            
             # Clear cart
             session.pop('cart', None)
             
@@ -323,6 +406,17 @@ def admin_add_product():
             image_url = request.form.get('image_url', '')
             stock = int(request.form.get('stock', 0))
             
+            # Handle file upload
+            if 'image_file' in request.files:
+                file = request.files['image_file']
+                if file and file.filename:
+                    uploaded_path = save_uploaded_file(file)
+                    if uploaded_path:
+                        image_url = uploaded_path
+                    else:
+                        flash('Invalid file type. Allowed: png, jpg, jpeg, gif, webp', 'error')
+                        return render_template('admin_add_product.html')
+            
             db = get_db()
             db.execute(
                 'INSERT INTO products (name, description, price, category, image_url, stock) VALUES (?, ?, ?, ?, ?, ?)',
@@ -338,6 +432,87 @@ def admin_add_product():
         logger.error(f"Error adding product: {e}")
         flash('An error occurred', 'error')
         return render_template('admin_add_product.html')
+
+@app.route('/admin/edit_product/<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_product(product_id):
+    try:
+        db = get_db()
+        product = db.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+        
+        if not product:
+            flash('Product not found', 'error')
+            return redirect(url_for('admin_products'))
+        
+        if request.method == 'POST':
+            name = request.form.get('name', '')
+            description = request.form.get('description', '')
+            price = float(request.form.get('price', 0))
+            category = request.form.get('category', '')
+            image_url = request.form.get('image_url', '')
+            stock = int(request.form.get('stock', 0))
+            
+            # Handle file upload - new image replaces old one
+            if 'image_file' in request.files:
+                file = request.files['image_file']
+                if file and file.filename:
+                    uploaded_path = save_uploaded_file(file)
+                    if uploaded_path:
+                        # Delete old image if it was a local upload
+                        old_image = product['image_url']
+                        if old_image and not old_image.startswith('http'):
+                            old_path = os.path.join(BASE_DIR, 'static', old_image)
+                            if os.path.exists(old_path):
+                                os.remove(old_path)
+                                logger.info(f"Deleted old image: {old_image}")
+                        image_url = uploaded_path
+                    else:
+                        flash('Invalid file type. Allowed: png, jpg, jpeg, gif, webp', 'error')
+                        return render_template('admin_edit_product.html', product=product)
+            
+            db.execute(
+                'UPDATE products SET name=?, description=?, price=?, category=?, image_url=?, stock=? WHERE id=?',
+                (name, description, price, category, image_url, stock, product_id)
+            )
+            db.commit()
+            flash('Product updated successfully!', 'success')
+            logger.info(f"Product updated: {name} (ID: {product_id})")
+            return redirect(url_for('admin_products'))
+        
+        return render_template('admin_edit_product.html', product=product)
+    except Exception as e:
+        logger.error(f"Error editing product {product_id}: {e}")
+        flash('An error occurred', 'error')
+        return redirect(url_for('admin_products'))
+
+@app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
+@login_required
+def admin_delete_product(product_id):
+    try:
+        db = get_db()
+        product = db.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+        
+        if not product:
+            flash('Product not found', 'error')
+            return redirect(url_for('admin_products'))
+        
+        # Delete the product image if it's a local upload
+        image_url = product['image_url']
+        if image_url and not image_url.startswith('http'):
+            image_path = os.path.join(BASE_DIR, 'static', image_url)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+                logger.info(f"Deleted image: {image_url}")
+        
+        db.execute('DELETE FROM products WHERE id = ?', (product_id,))
+        db.commit()
+        flash(f'Product "{product["name"]}" deleted successfully!', 'success')
+        logger.info(f"Product deleted: {product['name']} (ID: {product_id})")
+        return redirect(url_for('admin_products'))
+    except Exception as e:
+        logger.error(f"Error deleting product {product_id}: {e}")
+        flash('An error occurred', 'error')
+        return redirect(url_for('admin_products'))
 
 @app.errorhandler(404)
 def page_not_found(e):

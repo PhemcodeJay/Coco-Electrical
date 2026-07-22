@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Edit Product{% endblock %}
+
+{% block content %}
+<section class="container py-4">
+    <h1 class="mb-4">Edit Product</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Product Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3">{{ product.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price (₦) *</label>
+                    <input type="number" class="form-control" id="price" name="price" value="{{ product.price }}" min="0" step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category *</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Kitchen Appliances" {% if product.category == 'Kitchen Appliances' %}selected{% endif %}>Kitchen Appliances</option>
+                        <option value="Lighting" {% if product.category == 'Lighting' %}selected{% endif %}>Lighting</option>
+                        <option value="Tools" {% if product.category == 'Tools' %}selected{% endif %}>Tools</option>
+                        <option value="Accessories" {% if product.category == 'Accessories' %}selected{% endif %}>Accessories</option>
+                        <option value="Refrigeration" {% if product.category == 'Refrigeration' %}selected{% endif %}>Refrigeration</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="image_file" class="form-label">Product Image (Upload from device)</label>
+                    <input type="file" class="form-control" id="image_file" name="image_file" accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
+                    <small class="text-muted">Leave empty to keep current image. Allowed: png, jpg, jpeg, gif, webp (max 5MB)</small>
+                </div>
+                <div class="mb-3">
+                    <label for="image_url" class="form-label">Or Image URL (external link)</label>
+                    <input type="url" class="form-control" id="image_url" name="image_url" value="{{ product.image_url }}" placeholder="https://example.com/image.jpg">
+                    <small class="text-muted">Leave empty if uploading a file above</small>
+                </div>
+                {% if product.image_url %}
+                <div class="mb-3">
+                    <label class="form-label">Current Image</label>
+                    <div>
+                        {% if product.image_url.startswith('http') %}
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="height: 100px; object-fit: cover;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" style="height: 100px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <label for="stock" class="form-label">Stock Quantity *</label>
+                    <input type="number" class="form-control" id="stock" name="stock" value="{{ product.stock }}" min="0" required>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    <a href="{{ url_for('admin_products') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

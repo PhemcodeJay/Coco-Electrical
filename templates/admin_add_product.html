@@ -7,7 +7,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="name" class="form-label">Product Name *</label>
                     <input type="text" class="form-control" id="name" name="name" required>
@@ -32,8 +32,14 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="image_url" class="form-label">Image URL</label>
+                    <label for="image_file" class="form-label">Product Image (Upload from device)</label>
+                    <input type="file" class="form-control" id="image_file" name="image_file" accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
+                    <small class="text-muted">Allowed: png, jpg, jpeg, gif, webp (max 5MB)</small>
+                </div>
+                <div class="mb-3">
+                    <label for="image_url" class="form-label">Or Image URL (external link)</label>
                     <input type="url" class="form-control" id="image_url" name="image_url" placeholder="https://example.com/image.jpg">
+                    <small class="text-muted">Leave empty if uploading a file above</small>
                 </div>
                 <div class="mb-3">
                     <label for="stock" class="form-label">Stock Quantity *</label>

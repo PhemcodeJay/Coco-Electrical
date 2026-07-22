@@ -13,7 +13,13 @@
                     {% for item_id, item in cart_items.items() %}
                     <div class="row align-items-center mb-3 pb-3 border-bottom">
                         <div class="col-3 col-md-2">
-                            <img src="{{ item.image_url }}" class="img-fluid rounded" alt="{{ item.name }}">
+                            {% if item.image_url and item.image_url.startswith('http') %}
+                                <img src="{{ item.image_url }}" class="img-fluid rounded" alt="{{ item.name }}">
+                            {% elif item.image_url %}
+                                <img src="{{ url_for('static', filename=item.image_url) }}" class="img-fluid rounded" alt="{{ item.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/400x300?text=No+Image" class="img-fluid rounded" alt="{{ item.name }}">
+                            {% endif %}
                         </div>
                         <div class="col-9 col-md-4">
                             <h5 class="mb-0">{{ item.name }}</h5>
