@@ -1,7 +1,9 @@
 import multiprocessing
+import os
 
 # Gunicorn configuration for production
-bind = "0.0.0.0:8000"
+# Render provides PORT environment variable
+bind = f"0.0.0.0:{os.environ.get('PORT', '8000')}"
 workers = multiprocessing.cpu_count() * 2 + 1
 worker_class = "sync"
 worker_connections = 1000
