@@ -1,21 +1,33 @@
-services:
-  - type: web
-    name: coco-electrical
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --config gunicorn.conf.py wsgi:app
-    pythonVersion: "3.11"
-    envVars:
-      - key: FLASK_ENV
-        value: production
-      - key: ADMIN_USERNAME
-        value: admin
-      - key: ADMIN_PASSWORD
-        generateValue: true
-      - key: SECRET_KEY
-        generateValue: true
-      - key: WHATSAPP_NUMBER
-        value: +2348033939180
-    disk:
-      name: coco-data
-      mountPath: /opt/render/project/src/instance
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /opt/render/project/src
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV FLASK_ENV=production
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY . .
+
+# Create instance directory for database
+RUN mkdir -p /opt/render/project/src/instance
+
+# Expose port
+EXPOSE 8000
+
+# Start the application
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:app"]
