@@ -42,10 +42,17 @@ MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
 
 # Use application directory for database (persistent)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.environ.get('DATABASE_PATH') or os.path.join(BASE_DIR, 'instance', 'coco_store.db')
+DATABASE = os.environ.get('DATABASE_PATH') or os.path.join(BASE_DIR, 'coco_store.db')
 
-# Ensure instance and upload directories exist
-os.makedirs(os.path.dirname(DATABASE), exist_ok=True)
+# Ensure database directory exists
+db_dir = os.path.dirname(DATABASE)
+if db_dir and not os.path.exists(db_dir):
+    try:
+        os.makedirs(db_dir, exist_ok=True)
+    except OSError as e:
+        logger.warning(f"Could not create database directory {db_dir}: {e}")
+
+# Ensure upload directory exists
 os.makedirs(os.path.join(BASE_DIR, UPLOAD_FOLDER), exist_ok=True)
 
 # Get the directory where this script is located
